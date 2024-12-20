@@ -6624,9 +6624,11 @@ version = "0.22.0-alpha.1+dev"
 dependencies = [
  "ahash",
  "egui",
+ "egui_kittest",
  "fjadra",
  "nohash-hasher",
  "re_chunk",
+ "re_chunk_store",
  "re_data_ui",
  "re_entity_db",
  "re_format",
