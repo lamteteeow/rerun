@@ -39,7 +39,9 @@ egui.workspace = true
 fjadra.workspace = true
 nohash-hasher.workspace = true
 
-[dev-dependencies]
+
+# TODO:
+#[dev-dependencies]
 egui_kittest.workspace = true
 re_chunk_store.workspace = true
-
+re_viewport.workspace = true
