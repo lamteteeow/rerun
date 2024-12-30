@@ -554,6 +554,10 @@
 <a href="#554" id="554">554</a>
 <a href="#555" id="555">555</a>
 <a href="#556" id="556">556</a>
+<a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
 </pre></div><pre class="rust"><code><span class="attr">#![allow(clippy::unwrap_used)]
 
 </span><span class="kw">use </span><span class="kw">crate</span>::color_table::Scale::{S100, S1000, S150, S200, S250, S300, S325, S350, S550, S775};
@@ -996,6 +1000,10 @@
     </span><span class="attr">#[inline]
     </span><span class="kw">pub fn </span>drop_target_container_stroke(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; egui::Stroke {
         egui::Stroke::new(<span class="number">2.0</span>, <span class="self">self</span>.color(ColorToken::blue(S350)))
+    }
+
+    <span class="kw">pub fn </span>text(<span class="kw-2">&amp;</span><span class="self">self</span>, text: <span class="kw">impl </span>Into&lt;String&gt;, token: ColorToken) -&gt; egui::RichText {
+        egui::RichText::new(text).color(<span class="self">self</span>.color(token))
     }
 }
 

@@ -2268,29 +2268,6 @@
 <a href="#2268" id="2268">2268</a>
 <a href="#2269" id="2269">2269</a>
 <a href="#2270" id="2270">2270</a>
-<a href="#2271" id="2271">2271</a>
-<a href="#2272" id="2272">2272</a>
-<a href="#2273" id="2273">2273</a>
-<a href="#2274" id="2274">2274</a>
-<a href="#2275" id="2275">2275</a>
-<a href="#2276" id="2276">2276</a>
-<a href="#2277" id="2277">2277</a>
-<a href="#2278" id="2278">2278</a>
-<a href="#2279" id="2279">2279</a>
-<a href="#2280" id="2280">2280</a>
-<a href="#2281" id="2281">2281</a>
-<a href="#2282" id="2282">2282</a>
-<a href="#2283" id="2283">2283</a>
-<a href="#2284" id="2284">2284</a>
-<a href="#2285" id="2285">2285</a>
-<a href="#2286" id="2286">2286</a>
-<a href="#2287" id="2287">2287</a>
-<a href="#2288" id="2288">2288</a>
-<a href="#2289" id="2289">2289</a>
-<a href="#2290" id="2290">2290</a>
-<a href="#2291" id="2291">2291</a>
-<a href="#2292" id="2292">2292</a>
-<a href="#2293" id="2293">2293</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>itertools::Itertools <span class="kw">as _</span>;
@@ -2302,7 +2279,7 @@
 <span class="kw">use </span>re_log_types::{ApplicationId, FileSource, LogMsg, StoreKind};
 <span class="kw">use </span>re_renderer::WgpuResourcePoolStatistics;
 <span class="kw">use </span>re_smart_channel::{ReceiveSet, SmartChannelSource};
-<span class="kw">use </span>re_ui::{toasts, DesignTokens, UICommand, UICommandSender};
+<span class="kw">use </span>re_ui::{notifications, DesignTokens, UICommand, UICommandSender};
 <span class="kw">use </span>re_viewer_context::{
     command_channel,
     store_hub::{BlueprintPersistence, StoreHub, StoreHubStats},
@@ -2486,8 +2463,8 @@
     <span class="doccomment">/// Interface for all recordings and blueprints
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) store_hub: <span class="prelude-ty">Option</span>&lt;StoreHub&gt;,
 
-    <span class="doccomment">/// Toast notifications.
-    </span>toasts: toasts::Toasts,
+    <span class="doccomment">/// Notification panel.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) notifications: notifications::NotificationUi,
 
     memory_panel: <span class="kw">crate</span>::memory_panel::MemoryPanel,
     memory_panel_open: bool,
@@ -2626,7 +2603,8 @@
                 blueprint_loader(),
                 <span class="kw-2">&amp;</span><span class="kw">crate</span>::app_blueprint::setup_welcome_screen_blueprint,
             )),
-            toasts: toasts::Toasts::new(),
+            notifications: notifications::NotificationUi::new(),
+
             memory_panel: Default::default(),
             memory_panel_open: <span class="bool-val">false</span>,
 
@@ -3268,11 +3246,8 @@
 
         <span class="self">self</span>.egui_ctx
             .output_mut(|o| o.copied_text = direct_link.clone());
-        <span class="self">self</span>.toasts.add(toasts::Toast {
-            kind: toasts::ToastKind::Success,
-            text: <span class="macro">format!</span>(<span class="string">"Copied {direct_link:?} to clipboard"</span>),
-            options: toasts::ToastOptions::with_ttl_in_seconds(<span class="number">4.0</span>),
-        });
+        <span class="self">self</span>.notifications
+            .success(<span class="macro">format!</span>(<span class="string">"Copied {direct_link:?} to clipboard"</span>));
     }
 
     <span class="kw">fn </span>memory_panel_ui(
@@ -3410,6 +3385,8 @@
                         render_ctx.before_submit();
                     }
                 }
+
+                <span class="self">self</span>.show_text_logs_as_notifications();
             });
     }
 
@@ -3417,26 +3394,8 @@
     </span><span class="kw">fn </span>show_text_logs_as_notifications(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="macro">re_tracing::profile_function!</span>();
 
-        <span class="kw">while let </span><span class="prelude-val">Ok</span>(re_log::LogMsg { level, target, msg }) = <span class="self">self</span>.text_log_rx.try_recv() {
-            <span class="kw">let </span>is_rerun_crate = target.starts_with(<span class="string">"rerun"</span>) || target.starts_with(<span class="string">"re_"</span>);
-            <span class="kw">if </span>!is_rerun_crate {
-                <span class="kw">continue</span>;
-            }
-
-            <span class="kw">let </span>kind = <span class="kw">match </span>level {
-                re_log::Level::Error =&gt; toasts::ToastKind::Error,
-                re_log::Level::Warn =&gt; toasts::ToastKind::Warning,
-                re_log::Level::Info =&gt; toasts::ToastKind::Info,
-                re_log::Level::Debug | re_log::Level::Trace =&gt; {
-                    <span class="kw">continue</span>; <span class="comment">// too spammy
-                </span>}
-            };
-
-            <span class="self">self</span>.toasts.add(toasts::Toast {
-                kind,
-                text: msg,
-                options: toasts::ToastOptions::with_ttl_in_seconds(<span class="number">4.0</span>),
-            });
+        <span class="kw">while let </span><span class="prelude-val">Ok</span>(message) = <span class="self">self</span>.text_log_rx.try_recv() {
+            <span class="self">self</span>.notifications.add_log(message);
         }
     }
 
@@ -4167,7 +4126,6 @@
             store_hub.begin_frame(renderer_active_frame_idx);
         }
 
-        <span class="self">self</span>.show_text_logs_as_notifications();
         <span class="self">self</span>.receive_messages(<span class="kw-2">&amp;mut </span>store_hub, egui_ctx);
 
         <span class="kw">if </span><span class="self">self</span>.app_options().blueprint_gc {
@@ -4226,10 +4184,6 @@
             <span class="kw">if </span>re_ui::CUSTOM_WINDOW_DECORATIONS {
                 <span class="comment">// Paint the main window frame on top of everything else
                 </span>paint_native_window_frame(egui_ctx);
-            }
-
-            <span class="kw">if </span>!<span class="self">self</span>.screenshotter.is_screenshotting() {
-                <span class="self">self</span>.toasts.show(egui_ctx);
             }
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(cmd) = <span class="self">self</span>.cmd_palette.show(egui_ctx) {

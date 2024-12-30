@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"constant":["INFO_COLOR","SUCCESS_COLOR"],"enum":["ToastKind"],"fn":["default_toast_contents"],"struct":["Toast","ToastOptions","Toasts"],"type":["ToastContents"]};

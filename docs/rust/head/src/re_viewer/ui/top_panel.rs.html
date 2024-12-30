@@ -535,6 +535,8 @@
 <a href="#535" id="535">535</a>
 <a href="#536" id="536">536</a>
 <a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>egui::NumExt <span class="kw">as _</span>;
 <span class="kw">use </span>itertools::Itertools;
 
@@ -783,7 +785,7 @@
 }
 
 <span class="doccomment">/// Lay out the panel button right-to-left
-</span><span class="kw">fn </span>panel_buttons_r2l(app: <span class="kw-2">&amp;</span>App, app_blueprint: <span class="kw-2">&amp;</span>AppBlueprint&lt;<span class="lifetime">'_</span>&gt;, ui: <span class="kw-2">&amp;mut </span>egui::Ui) {
+</span><span class="kw">fn </span>panel_buttons_r2l(app: <span class="kw-2">&amp;mut </span>App, app_blueprint: <span class="kw-2">&amp;</span>AppBlueprint&lt;<span class="lifetime">'_</span>&gt;, ui: <span class="kw-2">&amp;mut </span>egui::Ui) {
     <span class="attr">#[cfg(target_arch = <span class="string">"wasm32"</span>)]
     </span><span class="kw">if </span>app.is_fullscreen_allowed() {
         <span class="kw">let </span>icon = <span class="kw">if </span>app.is_fullscreen_mode() {
@@ -848,6 +850,8 @@
     {
         app_blueprint.toggle_blueprint_panel(<span class="kw-2">&amp;</span>app.command_sender);
     }
+
+    re_ui::notifications::notification_toggle_button(ui, <span class="kw-2">&amp;mut </span>app.notifications);
 }
 
 <span class="doccomment">/// Shows clickable website link as an image (text doesn't look as nice)

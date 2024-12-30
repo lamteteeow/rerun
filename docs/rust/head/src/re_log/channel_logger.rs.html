@@ -52,8 +52,10 @@
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Capture log messages and send them to some receiver over a channel.
 
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>LogMsg {
     <span class="doccomment">/// The verbosity level.
     </span><span class="kw">pub </span>level: log::Level,
