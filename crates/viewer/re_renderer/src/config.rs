@@ -57,13 +57,19 @@ impl DeviceTier {
 
     /// Downlevel features required by the given tier.
     pub fn required_downlevel_capabilities(&self) -> wgpu::DownlevelCapabilities {
+        let flags = match self.tier {
+            DeviceTier::Gles => wgpu::DownlevelFlags::empty(),
+            // Require fully WebGPU compliance for the native tier.
+            // TODO(gfx-rs/wgpu#6841): On WSL requiring indirect execution causes device creation
+            //                         failure since it leads to requiring dynamic array access in GLSL which may not be supported.
+            //                         But since we don't use this anywhere yet we can just turn it off.
+            DeviceTier::FullWebGpuSupport => wgpu::DownlevelFlags::all()
+                .intersection(wgpu::DownlevelFlags::INDIRECT_EXECUTION.complement()),
+        };
+
         wgpu::DownlevelCapabilities {
-            flags: match self {
-                Self::Gles => wgpu::DownlevelFlags::empty(),
-                // Require fully WebGPU compliance for the native tier.
-                Self::FullWebGpuSupport => wgpu::DownlevelFlags::all(),
-            },
-            limits: Default::default(), // unused so far both here and in wgpu as of writing.
+            flags,
+            limits: Default::default(), // unused so far both here and in wgpu
 
             // Sm3 is missing a lot of features and even has an instruction count limit.
             // Sm4 is missing storage images and other minor features.
